@@ -8,5 +8,13 @@ namespace MovieSorter
 {
     class Movie
     {
+        private string title;
+
+        internal Movie(string title)
+        {
+            this.title = title;
+        }
+
+        internal string Title { get; set; }
     }
 }

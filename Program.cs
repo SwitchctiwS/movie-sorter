@@ -12,7 +12,10 @@ namespace MovieSorter
 
         static void Main(string[] args)
         {
-            while(true)
+            string fileDir = @"C:\Users\LT_Ja\Documents\Movies.txt";
+            List<Movie> movieList = StartUp(fileDir);
+
+            while (true)
             {
                 Console.Clear();
 
@@ -32,16 +35,16 @@ namespace MovieSorter
                 switch (menuChoice)
                 {
                     case ("1"): // View
-                        ViewMovie();
+                        ViewMovie(movieList);
                         break;
                     case ("2"): // Add
-                        AddMovie();
+                        AddMovie(movieList, fileDir);
                         break;
                     case ("3"): // Delete
-                        DeleteMovie();
+                        DeleteMovie(movieList);
                         break;
                     case ("4"): // Edit
-                        EditMovie();
+                        EditMovie(movieList);
                         break;
                     case ("9"): // Create list
                         CreateMovieList();
@@ -58,22 +61,120 @@ namespace MovieSorter
             }
         }
 
-        static void ViewMovie()
+        static List<Movie> StartUp(string fileDir)
+        {
+            List<Movie> movieList = new List<Movie>(); // Creates new list of movies from a file
+            foreach (string movieTitle in System.IO.File.ReadLines(fileDir))
+                movieList.Add(new Movie(movieTitle));
+
+            return movieList;
+        }
+
+        static void ViewMovie(List<Movie> movieList)
         {
             
         }
         
-        static void AddMovie()
+        static void AddMovie(List<Movie> movieList, string fileDir)
+        {
+            bool addMovie = false;
+
+            do
+            {
+                Console.Clear();
+
+                bool dupe = false;
+
+                Console.WriteLine("Please enter the movie's title.");
+                Movie newMovie = new Movie(Console.ReadLine());
+
+                foreach (Movie movie in movieList) // Checks if there's a duplicate
+                    if (movie == newMovie)
+                    {
+                        dupe = true;
+                        break;
+                    }
+
+                if (dupe != true) // Creates movie if no dupe
+                {
+                    movieList.Insert(0, newMovie);
+                    Console.WriteLine(movieList[0].Title);
+
+
+                    string[] tempStringArray = new string[movieList.Count];
+                    for (int i = 0; i < movieList.Count; i++)
+                        tempStringArray[i] = movieList[i].Title;
+
+                    Array.Sort(tempStringArray); // Puts movie list in alpha order
+
+                    for (int i = 0; i < movieList.Count; i++)
+                        movieList[i].Title = tempStringArray[i];
+
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileDir, true))
+                    {
+                        for (int i = 0; i < movieList.Count; i++)
+                            file.WriteLine(movieList[i].Title);
+                    }
+                    Console.WriteLine($"Successfully added {newMovie.Title}.");
+
+                    Console.WriteLine("Add another movie? (Y/N)");
+                    string choice = Console.ReadLine();
+
+                    if (choice == "y" || choice == "Y")
+                    {
+                        Console.WriteLine("\nPress any key to restart...");
+                        Console.ReadKey();
+                        continue;
+                    }
+                    else if (choice == "n" || choice == "N")
+                    {
+                        Console.WriteLine("\nPress any key to go back to the menu...");
+                        Console.ReadKey();
+                        addMovie = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nThat was not a valid choice.");
+                        Console.WriteLine("Press any key to restart...");
+                        Console.ReadKey();
+                        continue;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("That movie already exists.");
+                    Console.WriteLine("Add a different movie? (Y/N)");
+                    string choice = Console.ReadLine();
+
+                    if (choice == "y" || choice == "Y")
+                    {
+                        Console.WriteLine("\nPress any key to restart...");
+                        Console.ReadKey();
+                        continue;
+                    }
+                    else if (choice == "n" || choice == "N")
+                    {
+                        Console.WriteLine("\nPress any key to go back to the menu...");
+                        Console.ReadKey();
+                        Main(null);
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nThat was not a valid choice.");
+                        Console.WriteLine("Press any key to restart...");
+                        Console.ReadKey();
+                        continue;
+                    }
+                }
+            } while (addMovie == false);
+        }
+
+        static void DeleteMovie(List<Movie> movieList)
         {
 
         }
 
-        static void DeleteMovie()
-        {
-
-        }
-
-        static void EditMovie()
+        static void EditMovie(List<Movie> movieList)
         {
 
         }
@@ -244,6 +345,38 @@ namespace MovieSorter
                     }
                 }
             } while (createFile == false);
+        }
+
+        static bool YesOrNo()
+        {
+            string choice = Console.ReadLine();
+            bool exit = false;
+
+            do
+            {
+                if (choice == "y" || choice == "Y")
+                {
+                    Console.WriteLine("\nPress any key to restart...");
+                    Console.ReadKey();
+                    exit = true;
+                }
+                else if (choice == "n" || choice == "N")
+                {
+                    Console.WriteLine("\nPress any key to go back to the menu...");
+                    Console.ReadKey();
+                    Main(null);
+                }
+                else
+                {
+                    Console.WriteLine("\nThat was not a valid choice.");
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                    continue;
+                }
+
+            } while (exit == false);
+
+            return true;
         }
     }
 }
