@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MovieSorter
+﻿namespace MovieSorter
 {
     class Movie
     {
@@ -15,6 +9,16 @@ namespace MovieSorter
             this.title = title;
         }
 
-        internal string Title { get; set; }
+        internal string Title // Auto-implemented property didn't work. Don't know why.
+        {
+            get
+            {
+                return title;
+            }
+            set
+            {
+                title = value;
+            }
+        }
     }
 }

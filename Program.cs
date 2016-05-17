@@ -51,7 +51,7 @@ namespace MovieSorter
                         break;
                     case ("0"): // Exit
                         Exit();
-                        break;
+                        break; // Need syntatically(?)
                     default:
                         Console.WriteLine("\nThat was not a valid input.");
                         Console.WriteLine("Press any key to restart...");
@@ -63,7 +63,8 @@ namespace MovieSorter
 
         static List<Movie> StartUp(string fileDir)
         {
-            List<Movie> movieList = new List<Movie>(); // Creates new list of movies from a file
+            List<Movie> movieList = new List<Movie>(1);
+
             foreach (string movieTitle in System.IO.File.ReadLines(fileDir))
                 movieList.Add(new Movie(movieTitle));
 
@@ -89,84 +90,59 @@ namespace MovieSorter
                 Movie newMovie = new Movie(Console.ReadLine());
 
                 foreach (Movie movie in movieList) // Checks if there's a duplicate
-                    if (movie == newMovie)
+                    if (movie.Title == newMovie.Title)
                     {
                         dupe = true;
                         break;
                     }
 
-                if (dupe != true) // Creates movie if no dupe
+                if (dupe != true) // Adds movie if no dupe
                 {
-                    movieList.Insert(0, newMovie);
-                    Console.WriteLine(movieList[0].Title);
+                    movieList.Add(newMovie);
 
-
-                    string[] tempStringArray = new string[movieList.Count];
+                    string[] movies = new string[movieList.Count]; // Creates new array and sorts it. This method sucks.
                     for (int i = 0; i < movieList.Count; i++)
-                        tempStringArray[i] = movieList[i].Title;
+                        movies[i] = movieList[i].Title;
 
-                    Array.Sort(tempStringArray); // Puts movie list in alpha order
+                    movieList.Clear();
 
-                    for (int i = 0; i < movieList.Count; i++)
-                        movieList[i].Title = tempStringArray[i];
+                    Array.Sort(movies);
 
+                    foreach (string movie in movies) // Put contents of array back into a list
+                        movieList.Add(new Movie(movie));
+
+                    for (int i = 0; i < movieList.Count(); i++) // Removes empty spaces
+                        if (movieList[i].Title == null)
+                            movieList.RemoveAt(i);
+
+                    System.IO.File.Delete(fileDir); // Deletes file then writes to it. Figure out how to update file instead of just deleting it.
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileDir, true))
                     {
                         for (int i = 0; i < movieList.Count; i++)
                             file.WriteLine(movieList[i].Title);
                     }
-                    Console.WriteLine($"Successfully added {newMovie.Title}.");
 
+                    Console.WriteLine($"\nSuccessfully added {newMovie.Title}.");
                     Console.WriteLine("Add another movie? (Y/N)");
-                    string choice = Console.ReadLine();
 
-                    if (choice == "y" || choice == "Y")
-                    {
-                        Console.WriteLine("\nPress any key to restart...");
-                        Console.ReadKey();
+                    if (YesOrNo())
                         continue;
-                    }
-                    else if (choice == "n" || choice == "N")
-                    {
-                        Console.WriteLine("\nPress any key to go back to the menu...");
-                        Console.ReadKey();
-                        addMovie = true;
-                    }
                     else
-                    {
-                        Console.WriteLine("\nThat was not a valid choice.");
-                        Console.WriteLine("Press any key to restart...");
-                        Console.ReadKey();
-                        continue;
-                    }
+                        addMovie = true;
                 }
                 else
                 {
-                    Console.WriteLine("That movie already exists.");
+                    Console.WriteLine($"\n {newMovie.Title} already exists.");
                     Console.WriteLine("Add a different movie? (Y/N)");
-                    string choice = Console.ReadLine();
 
-                    if (choice == "y" || choice == "Y")
-                    {
-                        Console.WriteLine("\nPress any key to restart...");
-                        Console.ReadKey();
+                    if (YesOrNo())
                         continue;
-                    }
-                    else if (choice == "n" || choice == "N")
-                    {
-                        Console.WriteLine("\nPress any key to go back to the menu...");
-                        Console.ReadKey();
-                        Main(null);
-                    }
                     else
-                    {
-                        Console.WriteLine("\nThat was not a valid choice.");
-                        Console.WriteLine("Press any key to restart...");
-                        Console.ReadKey();
-                        continue;
-                    }
+                        addMovie = true;
                 }
             } while (addMovie == false);
+
+            return;
         }
 
         static void DeleteMovie(List<Movie> movieList)
@@ -179,7 +155,7 @@ namespace MovieSorter
 
         }
 
-        static void CreateMovieList()
+        static void CreateMovieList() // Change this so it happens at startup and does NOT prompt for where to save!
         {
             string folderPath = CreateDir();
             CreateFile(folderPath);
@@ -195,6 +171,7 @@ namespace MovieSorter
             Environment.Exit((int)ErrorCode.Success);
         }
 
+        // Delete CreateDir and CreateFile
         static string CreateDir()
         {
             bool createDir = false;
@@ -225,28 +202,11 @@ namespace MovieSorter
                     {
                         Console.WriteLine($"\nDirectory {folderPath} already exists.");
                         Console.WriteLine("Create a different directory? (Y/N)");
-                        string choice = Console.ReadLine();
 
-                        if (choice == "y" || choice == "Y")
-                        {
-                            Console.WriteLine($"\nUsing directory {folderPath}.");
-                            Console.WriteLine("Press any key to continue...");
-                            Console.ReadKey();
-                            createDir = true;
-                        }
-                        else if (choice == "n" || choice == "N")
-                        {
-                            Console.WriteLine("\nPress any key to restart...");
-                            Console.ReadKey();
+                        if (YesOrNo())
                             continue;
-                        }
                         else
-                        {
-                            Console.WriteLine("\nThat was not a valid choice.");
-                            Console.WriteLine("Press any key to restart...");
-                            Console.ReadKey();
-                            continue;
-                        }
+                            createDir = true;
                     }
                     else
                     {
@@ -321,33 +281,17 @@ namespace MovieSorter
                     Console.WriteLine($"\nFile {fileName} already exists at {folderPath}."); // Prompts user to create a different file if file already exists
                     Console.WriteLine("Create a different file? (Y/N)");
 
-                    string choice = Console.ReadLine();
-
-                    if (choice == "y" || choice == "Y")
-                    {
-                        Console.WriteLine("\nPress any key to restart...");
-                        Console.ReadKey();
+                    if (YesOrNo())
                         continue;
-                    }
-                    else if (choice == "n" || choice == "N")
-                    {
-                        Console.WriteLine($"\nUsing file {fileName}");
-                        Console.WriteLine("Press any key to return to the menu...");
-                        Console.ReadKey();
-                        createFile = true;
-                    }
                     else
-                    {
-                        Console.WriteLine("\nThat was not a valid choice.");
-                        Console.WriteLine("Press any key to restart...");
-                        Console.ReadKey();
-                        continue;
-                    }
+                        Main(null);
                 }
             } while (createFile == false);
+
+            return;
         }
 
-        static bool YesOrNo()
+        static bool YesOrNo() // Returns true if yes, false if no
         {
             string choice = Console.ReadLine();
             bool exit = false;
@@ -359,12 +303,13 @@ namespace MovieSorter
                     Console.WriteLine("\nPress any key to restart...");
                     Console.ReadKey();
                     exit = true;
+                    return exit;
                 }
                 else if (choice == "n" || choice == "N")
                 {
                     Console.WriteLine("\nPress any key to go back to the menu...");
                     Console.ReadKey();
-                    Main(null);
+                    return exit;
                 }
                 else
                 {
@@ -373,10 +318,9 @@ namespace MovieSorter
                     Console.ReadKey();
                     continue;
                 }
-
             } while (exit == false);
 
-            return true;
+            return exit;
         }
     }
 }
