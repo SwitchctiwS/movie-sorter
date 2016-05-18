@@ -22,7 +22,7 @@ namespace MovieSorter
                 Console.Clear();
 
                 Console.WriteLine("What would you like to do?");
-                Console.WriteLine("Type the number then press return.");
+                Console.WriteLine("Type the number then press enter.");
                 Console.WriteLine();
                 Console.WriteLine("1. View movie list");
                 Console.WriteLine("2. Add to movie list");
@@ -36,7 +36,7 @@ namespace MovieSorter
                 switch (menuChoice)
                 {
                     case ("1"): // View
-                        ViewMovie();
+                        ViewMovies();
                         break;
                     case ("2"): // Add
                         AddMovie();
@@ -59,61 +59,8 @@ namespace MovieSorter
             }
         }
 
-        static void StartUp() // Change so that it creates directory and makes a movies list
-        {
-            if (!System.IO.File.Exists(fileDir))
-            {
-                Console.WriteLine("Movies.txt does not exist!");
-                Console.WriteLine("Create? (Y/N)");
-                if (YesOrNo("continue", "exit"))
-                    CreateFile();
-                else
-                    Environment.Exit((int)ErrorCode.NoFile);
-            }
-
-            if (movieList.Count > 0)
-                foreach (string movieTitle in System.IO.File.ReadLines(fileDir))
-                    movieList.Add(new Movie(movieTitle));
-
-            return;
-        }
-
-        static void CreateFile()
-        {
-            bool createFile = false;
-
-            do
-            {
-                System.IO.File.Create(fileDir); // Create file
-
-                if (!System.IO.File.Exists(fileDir)) // Check if file was created
-                    ErrorHandler((int)ErrorCode.NoFile);
-                else
-                {
-                    Console.WriteLine($"\nFile created at {fileDir}");
-                    Console.WriteLine("Press any key to return to the menu...");
-                    Console.ReadKey();
-                    createFile = true; // Exit loop when file is created
-                }
-            } while (createFile == false);
-
-            return;
-        }
-
-        static void ViewMovie()
-        {
-            Console.Clear();
-
-            Console.WriteLine("Movie list:");
-            Console.WriteLine();
-
-            foreach (string movieTitle in System.IO.File.ReadLines(fileDir)) // Reads from file and displays
-                Console.WriteLine(movieTitle);
-
-            Console.WriteLine("\nPress any key to exit...");
-            Console.ReadKey();
-        }
-        
+        // Note: Methods sorted in alpha order
+        // Core methods
         static void AddMovie()
         {
             bool addMovie = false;
@@ -140,40 +87,30 @@ namespace MovieSorter
 
                     string[] tempStringArr = new string[movieList.Count]; // Creates new array and sorts it. Changes this and make it efficient.
                     for (int i = 0; i < movieList.Count; i++)
-                        tempStringArr[i] = movieList[i].Title;
+                        if (movieList[i].Title != null) // Removes empty spaces
+                            tempStringArr[i] = movieList[i].Title;
 
                     movieList.Clear();
 
                     Array.Sort(tempStringArr);
 
+                    System.IO.File.WriteAllLines(fileDir, tempStringArr);
+
                     foreach (string movieTitle in tempStringArr) // Put contents of array back into a list
                         movieList.Add(new Movie(movieTitle));
 
-                    for (int i = 0; i < movieList.Count(); i++) // Removes empty spaces
-                        if (movieList[i].Title == null)
-                            movieList.RemoveAt(i);
+                    Console.WriteLine($"\nSuccessfully added \"{newMovie.Title}\"."); // Add error checking at some point
 
-                    System.IO.File.Delete(fileDir); // Deletes file then writes to it. Figure out how to update file instead of just deleting it.
-                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileDir, true))
-                    {
-                        for (int i = 0; i < movieList.Count; i++)
-                            file.WriteLine(movieList[i].Title);
-                    }
-
-                    Console.WriteLine($"\nSuccessfully added {newMovie.Title}."); // Add error checking
-                    Console.WriteLine("Add another movie? (Y/N)");
-
-                    if (YesOrNo("continue", "exit"))
+                    if (YesOrNo("Add another movie? (Y/N)"))
                         continue;
                     else
                         addMovie = true;
                 }
                 else
                 {
-                    Console.WriteLine($"\n {newMovie.Title} already exists.");
-                    Console.WriteLine("Add a different movie? (Y/N)");
+                    Console.WriteLine($"\n\"{newMovie.Title}\" already exists.");
 
-                    if (YesOrNo("continue", "exit"))
+                    if (YesOrNo("Add a different movie? (Y/N)"))
                         continue;
                     else
                         addMovie = true;
@@ -203,173 +140,117 @@ namespace MovieSorter
             Environment.Exit((int)ErrorCode.Success);
         }
 
-        /*
-         
-        static void CreateMovieList() // Change this so it happens at startup and does NOT prompt for where to save!
+        static void ViewMovies()
         {
-            string folderPath = CreateDir();
-            CreateFile(folderPath);
-        }
+            Console.Clear();
 
-        // Delete CreateDir and CreateFile
-        static string CreateDir()
-        {
-            bool createDir = false;
-            string folderPath = null;
-
-            do
+            if (System.IO.File.Exists(fileDir))
             {
-                Console.Clear(); // Squeaky clean
-
-                Console.WriteLine("It is recommeneded that the default values are used because I don't know how to create config files yet.");
+                Console.WriteLine("Movie list:");
                 Console.WriteLine();
-                Console.WriteLine("Where do you want to save the text file?"); // Prompt user for file's path
-                Console.WriteLine("Note: Default (i.e. no path) is the Documents folder.");
-                Console.WriteLine("Type 0 and press return to go back to the menu.");
-                folderPath = Console.ReadLine(); // Name of path
+                Console.WriteLine("========");
 
-                if (folderPath == "0")
-                    Main(null);
-
-                if (folderPath.Length == 0) // Set to default (Documents folder)
-                {
-                    folderPath = @"C:\Users\LT_Ja\Documents";
-                    createDir = true;
-                }
+                if (movieList.Count() == 0)
+                    Console.WriteLine("--Empty--");
                 else
-                {
-                    if (System.IO.Directory.Exists(folderPath)) // If directory already exists, ask user if they want to create a different directory
-                    {
-                        Console.WriteLine($"\nDirectory {folderPath} already exists.");
-                        Console.WriteLine("Create a different directory? (Y/N)");
+                    foreach (string movieTitle in System.IO.File.ReadLines(fileDir)) // Reads from file and displays movie title
+                        Console.WriteLine(movieTitle);
 
-                        if (YesOrNo())
-                            continue;
-                        else
-                            createDir = true;
-                    }
-                    else
-                    {
-                        System.IO.Directory.CreateDirectory(folderPath); // Create Directory
-
-                        if (!System.IO.Directory.Exists(folderPath)) // Check if directory was created
-                        {
-                            Console.WriteLine("\nThere was an error.");
-                            Console.WriteLine("Press any key to exit...");
-                            Console.ReadKey();
-                            Environment.Exit((int)ErrorCode.Folder); // Terminates if false
-                        }
-                        else
-                        {
-                            Console.WriteLine($"\nFolder created at {folderPath}");
-                            Console.WriteLine("Press any key to return to the menu...");
-                            Console.ReadKey();
-                            createDir = true; // Exit loop when folder is created
-                        }
-                    }
-                }
-            } while (createDir == false);
-
-            return folderPath;
+                Console.WriteLine("========");
+                Console.WriteLine();
+                Console.WriteLine("Press any key to return...");
+                Console.ReadKey();
+            }
+            else
+                ErrorHandler(ErrorCode.NoFile);
         }
 
-        static void CreateFile(string folderPath)
+        // Side methods
+        static void CreateFile()
         {
             bool createFile = false;
-            string fileName = null;
 
             do
             {
-                Console.Clear(); // Squeaky clean
+                System.IO.File.Create(fileDir).Close(); // Create and close file to allow editing later
 
-                Console.WriteLine("What do you want the text file to be called?"); // Prompt user for name of file
-                Console.WriteLine("Note: Default (i.e. no filename) is \"Movies.txt\".");
-                Console.WriteLine("Type 0 and press return to go back to the menu.");
-                fileName = Console.ReadLine(); // Name of text file
-
-                if (fileName == "0")
-                    Main(null);
-
-                if (fileName.Length == 0)
-                    fileName = "Movies"; // Default
-
-                fileName += ".txt"; // Add file type
-
-                string filePath = System.IO.Path.Combine(folderPath, fileName);
-
-                if (!System.IO.File.Exists(filePath)) // Checks if the file exists
+                if (System.IO.File.Exists(fileDir)) // Check if file was created
                 {
-                    System.IO.File.Create(filePath); // Create file
+                    Console.Clear();
 
-                    if (!System.IO.File.Exists(filePath)) // Check if file was created
-                    {
-                        Console.WriteLine("\nThere was an error.");
-                        Console.WriteLine("Press any key to exit...");
-                        Console.ReadKey();
-                        Environment.Exit((int)ErrorCode.File); // Terminates if false
-                    }
-                    else
-                    {
-                        Console.WriteLine($"\nFile created at {filePath}");
-                        Console.WriteLine("Press any key to return to the menu...");
-                        Console.ReadKey();
-                        createFile = true; // Exit loop when file is created
-                    }
+                    Console.WriteLine($"File created at {fileDir}");
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                    createFile = true; // Exit loop when file is created
                 }
                 else
-                {
-                    Console.WriteLine($"\nFile {fileName} already exists at {folderPath}."); // Prompts user to create a different file if file already exists
-                    Console.WriteLine("Create a different file? (Y/N)");
-
-                    if (YesOrNo())
-                        continue;
-                    else
-                        Main(null);
-                }
+                    ErrorHandler(ErrorCode.NoFile);
             } while (createFile == false);
 
             return;
         }
-        */
 
-        static bool YesOrNo(string yes, string no) // Returns true if yes, false if no
+        static void ErrorHandler(ErrorCode errorName)
         {
-            string choice = Console.ReadLine();
+            Console.Clear();
+
+            Console.WriteLine("\nThere was an error.");
+            Console.WriteLine($"Errorcode: {errorName}");
+            Console.WriteLine();
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+            Environment.Exit((int)errorName);
+        }
+
+        static void StartUp()
+        {
+            if (System.IO.File.Exists(fileDir))
+                foreach (string movieTitle in System.IO.File.ReadLines(fileDir))
+                    movieList.Add(new Movie(movieTitle));
+            else
+            {
+                Console.WriteLine("Movies.txt does not exist!");
+
+                if (YesOrNo("Create file? (Y/N)"))
+                    CreateFile();
+                else
+                {
+                    Console.WriteLine("\nPress any key to exit...");
+                    Console.ReadKey();
+                    Environment.Exit((int)ErrorCode.NoFile);
+                }
+            }
+
+            return;
+        }
+
+        static bool YesOrNo(string prompt) // Returns true if yes, false if no
+        {
             bool exit = false;
 
             do
             {
+                Console.WriteLine(prompt);
+
+                string choice = Console.ReadLine();
+
                 if (choice == "y" || choice == "Y")
-                {
-                    Console.WriteLine($"\nPress any key to {yes}...");
-                    Console.ReadKey();
                     exit = true;
-                    return exit;
-                }
                 else if (choice == "n" || choice == "N")
-                {
-                    Console.WriteLine($"\nPress any key to {no}...");
-                    Console.ReadKey();
-                    return exit;
-                }
+                    break;
                 else
                 {
                     Console.WriteLine("\nThat was not a valid choice.");
-                    Console.WriteLine("Press any key to continue...");
+                    Console.WriteLine("Press any key to restart...");
                     Console.ReadKey();
+
+                    Console.Clear();
+
                     continue;
                 }
             } while (exit == false);
 
             return exit;
-        }
-
-        static void ErrorHandler(int errorName)
-        {
-            Console.WriteLine("\nThere was an error.");
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-            Environment.Exit(errorName); // Terminates if false
         }
     }
 }
