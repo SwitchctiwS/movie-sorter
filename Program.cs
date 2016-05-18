@@ -8,12 +8,14 @@ namespace MovieSorter
 {
     class Program
     {
-        public enum ErrorCode { Success, Folder, File, Unknown };
+        public enum ErrorCode { Success, NoFile };
+
+        static List<Movie> movieList = new List<Movie>();
+        private const string fileDir = @"C:\Users\LT_Ja\Documents\Movies.txt"; // Make a way to change this (config file or something)
 
         static void Main(string[] args)
         {
-            string fileDir = @"C:\Users\LT_Ja\Documents\Movies.txt";
-            List<Movie> movieList = StartUp(fileDir);
+            StartUp();
 
             while (true)
             {
@@ -26,7 +28,6 @@ namespace MovieSorter
                 Console.WriteLine("2. Add to movie list");
                 Console.WriteLine("3. Delete from movie list");
                 Console.WriteLine("4. Edit movie list");
-                Console.WriteLine("9. Create movie list");
                 Console.WriteLine("0. Exit");
 
                 // User's input
@@ -35,19 +36,16 @@ namespace MovieSorter
                 switch (menuChoice)
                 {
                     case ("1"): // View
-                        ViewMovie(movieList);
+                        ViewMovie();
                         break;
                     case ("2"): // Add
-                        AddMovie(movieList, fileDir);
+                        AddMovie();
                         break;
                     case ("3"): // Delete
-                        DeleteMovie(movieList);
+                        DeleteMovie();
                         break;
                     case ("4"): // Edit
-                        EditMovie(movieList);
-                        break;
-                    case ("9"): // Create list
-                        CreateMovieList();
+                        EditMovie();
                         break;
                     case ("0"): // Exit
                         Exit();
@@ -61,22 +59,62 @@ namespace MovieSorter
             }
         }
 
-        static List<Movie> StartUp(string fileDir)
+        static void StartUp() // Change so that it creates directory and makes a movies list
         {
-            List<Movie> movieList = new List<Movie>(1);
+            if (!System.IO.File.Exists(fileDir))
+            {
+                Console.WriteLine("Movies.txt does not exist!");
+                Console.WriteLine("Create? (Y/N)");
+                if (YesOrNo("continue", "exit"))
+                    CreateFile();
+                else
+                    Environment.Exit((int)ErrorCode.NoFile);
+            }
 
-            foreach (string movieTitle in System.IO.File.ReadLines(fileDir))
-                movieList.Add(new Movie(movieTitle));
+            if (movieList.Count > 0)
+                foreach (string movieTitle in System.IO.File.ReadLines(fileDir))
+                    movieList.Add(new Movie(movieTitle));
 
-            return movieList;
+            return;
         }
 
-        static void ViewMovie(List<Movie> movieList)
+        static void CreateFile()
         {
-            
+            bool createFile = false;
+
+            do
+            {
+                System.IO.File.Create(fileDir); // Create file
+
+                if (!System.IO.File.Exists(fileDir)) // Check if file was created
+                    ErrorHandler((int)ErrorCode.NoFile);
+                else
+                {
+                    Console.WriteLine($"\nFile created at {fileDir}");
+                    Console.WriteLine("Press any key to return to the menu...");
+                    Console.ReadKey();
+                    createFile = true; // Exit loop when file is created
+                }
+            } while (createFile == false);
+
+            return;
+        }
+
+        static void ViewMovie()
+        {
+            Console.Clear();
+
+            Console.WriteLine("Movie list:");
+            Console.WriteLine();
+
+            foreach (string movieTitle in System.IO.File.ReadLines(fileDir)) // Reads from file and displays
+                Console.WriteLine(movieTitle);
+
+            Console.WriteLine("\nPress any key to exit...");
+            Console.ReadKey();
         }
         
-        static void AddMovie(List<Movie> movieList, string fileDir)
+        static void AddMovie()
         {
             bool addMovie = false;
 
@@ -100,16 +138,16 @@ namespace MovieSorter
                 {
                     movieList.Add(newMovie);
 
-                    string[] movies = new string[movieList.Count]; // Creates new array and sorts it. This method sucks.
+                    string[] tempStringArr = new string[movieList.Count]; // Creates new array and sorts it. Changes this and make it efficient.
                     for (int i = 0; i < movieList.Count; i++)
-                        movies[i] = movieList[i].Title;
+                        tempStringArr[i] = movieList[i].Title;
 
                     movieList.Clear();
 
-                    Array.Sort(movies);
+                    Array.Sort(tempStringArr);
 
-                    foreach (string movie in movies) // Put contents of array back into a list
-                        movieList.Add(new Movie(movie));
+                    foreach (string movieTitle in tempStringArr) // Put contents of array back into a list
+                        movieList.Add(new Movie(movieTitle));
 
                     for (int i = 0; i < movieList.Count(); i++) // Removes empty spaces
                         if (movieList[i].Title == null)
@@ -122,10 +160,10 @@ namespace MovieSorter
                             file.WriteLine(movieList[i].Title);
                     }
 
-                    Console.WriteLine($"\nSuccessfully added {newMovie.Title}.");
+                    Console.WriteLine($"\nSuccessfully added {newMovie.Title}."); // Add error checking
                     Console.WriteLine("Add another movie? (Y/N)");
 
-                    if (YesOrNo())
+                    if (YesOrNo("continue", "exit"))
                         continue;
                     else
                         addMovie = true;
@@ -135,7 +173,7 @@ namespace MovieSorter
                     Console.WriteLine($"\n {newMovie.Title} already exists.");
                     Console.WriteLine("Add a different movie? (Y/N)");
 
-                    if (YesOrNo())
+                    if (YesOrNo("continue", "exit"))
                         continue;
                     else
                         addMovie = true;
@@ -145,20 +183,14 @@ namespace MovieSorter
             return;
         }
 
-        static void DeleteMovie(List<Movie> movieList)
+        static void DeleteMovie()
         {
 
         }
 
-        static void EditMovie(List<Movie> movieList)
+        static void EditMovie()
         {
 
-        }
-
-        static void CreateMovieList() // Change this so it happens at startup and does NOT prompt for where to save!
-        {
-            string folderPath = CreateDir();
-            CreateFile(folderPath);
         }
 
         static void Exit()
@@ -169,6 +201,14 @@ namespace MovieSorter
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
             Environment.Exit((int)ErrorCode.Success);
+        }
+
+        /*
+         
+        static void CreateMovieList() // Change this so it happens at startup and does NOT prompt for where to save!
+        {
+            string folderPath = CreateDir();
+            CreateFile(folderPath);
         }
 
         // Delete CreateDir and CreateFile
@@ -290,8 +330,9 @@ namespace MovieSorter
 
             return;
         }
+        */
 
-        static bool YesOrNo() // Returns true if yes, false if no
+        static bool YesOrNo(string yes, string no) // Returns true if yes, false if no
         {
             string choice = Console.ReadLine();
             bool exit = false;
@@ -300,14 +341,14 @@ namespace MovieSorter
             {
                 if (choice == "y" || choice == "Y")
                 {
-                    Console.WriteLine("\nPress any key to restart...");
+                    Console.WriteLine($"\nPress any key to {yes}...");
                     Console.ReadKey();
                     exit = true;
                     return exit;
                 }
                 else if (choice == "n" || choice == "N")
                 {
-                    Console.WriteLine("\nPress any key to go back to the menu...");
+                    Console.WriteLine($"\nPress any key to {no}...");
                     Console.ReadKey();
                     return exit;
                 }
@@ -321,6 +362,14 @@ namespace MovieSorter
             } while (exit == false);
 
             return exit;
+        }
+
+        static void ErrorHandler(int errorName)
+        {
+            Console.WriteLine("\nThere was an error.");
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+            Environment.Exit(errorName); // Terminates if false
         }
     }
 }
