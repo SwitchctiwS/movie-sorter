@@ -9,16 +9,17 @@ namespace MovieSorter
         public enum ErrorCode { Success, FileDoesNotExist, CouldNotDelete };
 
         static List<string> movieList = new List<string>(); // Global variable (good idea?) All methods alter this
-        private const string fileDir = @"C:\Users\LT_Ja\Documents\Movies.txt"; // Make a way to change this (config file or something)
+        private const string fileDir = @"/home/jared_thibault/Documents/Movies.txt"; // Make a way to change this (config file or something)
 
-        static void Main(string[] args)
+        static void Main(string[] args) // Acts as a menu
         {
             StartUp();
 
-            while (true)
+            while(true) // Infinite loop (probably a bad idea)
             {
                 Console.Clear();
 
+                //Menu
                 Console.WriteLine("What would you like to do?");
                 Console.WriteLine("Type the number then press enter.");
                 Console.WriteLine();
@@ -27,8 +28,7 @@ namespace MovieSorter
                 Console.WriteLine("3. Delete from movie list");
                 Console.WriteLine("0. Exit");
 
-                // User's input
-                string menuChoice = Console.ReadLine();
+                string menuChoice = Console.ReadLine(); // User's input
 
                 switch (menuChoice)
                 {
@@ -57,6 +57,10 @@ namespace MovieSorter
 
         // Note: Methods sorted in alpha order
         // Core methods
+
+        /// <summary>
+        /// Adds movie to list and updates file.
+        /// </summary>
         static void AddMovie()
         {
             bool addMovie = false;
@@ -79,14 +83,13 @@ namespace MovieSorter
                 {
                     movieList.Add(newMovie);
                     movieList.Sort();
-
-                    System.IO.File.WriteAllLines(fileDir, movieList.ToArray());
+                    System.IO.File.WriteAllLines(fileDir, movieList.ToArray()); // Updates file
 
                     ViewMovies();
 
                     Console.WriteLine($"Successfully added \"{newMovie}\"."); // Add error checking at some point
 
-                    if (YesOrNo("Add another movie? (Y/N)"))
+                    if (YesOrNo("Add another movie? (Y/N)")) // Prompt whether user wants to add another movie
                     {
                         continue;
                     }
@@ -95,7 +98,7 @@ namespace MovieSorter
                         addMovie = true;
                     }
                 }
-                else
+                else // Movie already exists, so reprompt user
                 {
                     Console.WriteLine($"\n\"{newMovie}\" already exists.");
 
@@ -113,7 +116,10 @@ namespace MovieSorter
             return;
         }
 
-        static void DeleteMovie() // Figure out
+        /// <summary>
+        /// Deletes movie from list and updates file.
+        /// </summary>
+        static void DeleteMovie()
         {
             bool deleteMovie = false;
 
@@ -131,19 +137,18 @@ namespace MovieSorter
                 {
                     return;
                 }
-                if (movieList.Exists(x => x == oldMovie)) // Deletes and sorts movie list if it exists
+                if (movieList.Exists(x => x == oldMovie)) // Removie() also gives a False if it couldn't find the item, so this avoid that.
                 {
-                    if (movieList.Remove(oldMovie))
+                    if (movieList.Remove(oldMovie)) // Deletes and sorts movie list if it exists
                     {
                         movieList.Sort();
-
                         System.IO.File.WriteAllLines(fileDir, movieList.ToArray());
 
                         ViewMovies();
 
-                        Console.WriteLine($"\nSuccessfully removed \"{oldMovie}\"."); // Add error checking at some point
+                        Console.WriteLine($"Successfully removed \"{oldMovie}\"."); // Add error checking at some point
 
-                        if (YesOrNo("Delete another movie? (Y/N)"))
+                        if (YesOrNo("Delete another movie? (Y/N)")) // Prompt user if they want to delete another movie
                         {
                             continue;
                         }
@@ -152,12 +157,12 @@ namespace MovieSorter
                             deleteMovie = true;
                         }
                     }
-                    else
+                    else // Gives error if it could not delete
                     {
                         ErrorHandler(ErrorCode.CouldNotDelete);
                     }
                 }
-                else
+                else // Reprompts user if it couldn't find the movie.
                 {
                     Console.WriteLine($"\n\"{oldMovie}\" does not exist.");
 
@@ -175,14 +180,20 @@ namespace MovieSorter
             return;
         }
 
+        /// <summary>
+        /// Exits program.
+        /// </summary>
         static void Exit()
         {
-            Console.WriteLine("\nGoodbye");
+            Console.WriteLine("\nGoodbye"); // Politeness
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
             Environment.Exit((int)ErrorCode.Success);
         }
 
+        /// <summary>
+        /// Display all movies currently in list.
+        /// </summary>
         static void ViewMovies()
         {
             Console.Clear();
@@ -193,11 +204,11 @@ namespace MovieSorter
 
             if (movieList.Count() == 0)
             {
-                Console.WriteLine("--Empty--");
+                Console.WriteLine("--Empty--"); // Displays this if there are no movies in the list.
             }
             else
             {
-                foreach (string movieTitle in movieList) // Reads directly from file and displays movie title
+                foreach (string movieTitle in movieList) // Displays movie title
                 {
                     Console.WriteLine(movieTitle);
                 }
@@ -209,20 +220,26 @@ namespace MovieSorter
             return;
         }
 
-        // Side methods
+        // Additional methods
+
+        /// <summary>
+        /// Creates a text file in a directory if it doesn't already exist.
+        /// </summary>
         static void CreateFile()
         {
             bool createFile = false;
 
             do
             {
+                Console.Clear();
+
                 System.IO.File.Create(fileDir).Close(); // Create and close file to allow editing later
+
+                Console.WriteLine("Creating file...");
 
                 if (System.IO.File.Exists(fileDir)) // Check if file was created
                 {
-                    Console.Clear();
-
-                    Console.WriteLine($"File created at {fileDir}");
+                    Console.WriteLine($"\nFile created at {fileDir}");
                     Console.WriteLine("Press any key to continue...");
                     Console.ReadKey();
                     createFile = true; // Exit loop when file is created
@@ -236,6 +253,10 @@ namespace MovieSorter
             return;
         }
 
+        /// <summary>
+        /// Displays and returns an error code, then exits program.
+        /// </summary>
+        /// <param name="errorName">The name of the error</param>
         static void ErrorHandler(ErrorCode errorName)
         {
             Console.Clear();
@@ -248,28 +269,32 @@ namespace MovieSorter
             Environment.Exit((int)errorName);
         }
 
+        /// <summary>
+        /// Reads from file and adds all movies to list. Also sorts file and removes duplicates.
+        /// </summary>
         static void StartUp()
         {
-            if (System.IO.File.Exists(fileDir))
+            if (System.IO.File.Exists(fileDir)) // Checks if file exists. If it doesn't, makes a call to CreateFile().
             {
                 foreach (string movieTitle in System.IO.File.ReadLines(fileDir))
                 {
-                    if (movieTitle.Length != 0) // Gets rid of blanks
+                    if (movieTitle.Length != 0 && !movieList.Exists(x => x == movieTitle)) // Gets rid of blanks and duplicates
                     {
                         movieList.Add(movieTitle);
                     }
                 }
-                movieList.Sort();
+                movieList.Sort(); // Sorts list
+                System.IO.File.WriteAllLines(fileDir, movieList.ToArray()); // Updates file
             }
             else
             {
-                Console.WriteLine("Movies.txt does not exist!");
+                Console.WriteLine($"{fileDir} does not exist!");
 
                 if (YesOrNo("Create file? (Y/N)"))
                 {
                     CreateFile();
                 }
-                else
+                else // Exit if user doesn't want to create the file.
                 {
                     Console.WriteLine("\nPress any key to exit...");
                     Console.ReadKey();
@@ -280,6 +305,11 @@ namespace MovieSorter
             return;
         }
 
+        /// <summary>
+        /// Prompts the user with a yes-or-no question.
+        /// </summary>
+        /// <param name="prompt">The question to ask the user.</param>
+        /// <returns>True if "yes", False if "no".</returns>
         static bool YesOrNo(string prompt) // Returns true if yes, false if no
         {
             bool exit = false;
@@ -289,7 +319,6 @@ namespace MovieSorter
                 Console.WriteLine(prompt);
 
                 string choice = Console.ReadLine();
-
                 if (choice == "y" || choice == "Y")
                 {
                     exit = true;
