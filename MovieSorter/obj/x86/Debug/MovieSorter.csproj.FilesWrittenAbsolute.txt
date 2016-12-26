@@ -1,0 +1,5 @@
+/media/jared_thibault/SHARED/Projects/Programming/CSharp/MovieSorter/MovieSorter/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/media/jared_thibault/SHARED/Projects/Programming/CSharp/MovieSorter/MovieSorter/bin/Debug/MovieSorter.exe.mdb
+/media/jared_thibault/SHARED/Projects/Programming/CSharp/MovieSorter/MovieSorter/bin/Debug/MovieSorter.exe
+/media/jared_thibault/SHARED/Projects/Programming/CSharp/MovieSorter/MovieSorter/obj/x86/Debug/MovieSorter.exe
+/media/jared_thibault/SHARED/Projects/Programming/CSharp/MovieSorter/MovieSorter/obj/x86/Debug/MovieSorter.exe.mdb

@@ -1,0 +1,6 @@
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\bin\Debug\MovieSorter.exe.config
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\bin\Debug\MovieSorter.exe
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\bin\Debug\MovieSorter.pdb
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\obj\Debug\MovieSorter.exe
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\obj\Debug\MovieSorter.pdb
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\obj\Debug\MovieSorter.csprojResolveAssemblyReference.cache

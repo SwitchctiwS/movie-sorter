@@ -1,0 +1,5 @@
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\bin\Release\MovieSorter.exe.config
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\bin\Release\MovieSorter.exe
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\bin\Release\MovieSorter.pdb
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\obj\Release\MovieSorter.exe
+C:\Users\LT_Ja\Documents\Visual Studio 2015\Projects\CSharp\MovieSorter\MovieSorter\obj\Release\MovieSorter.pdb
